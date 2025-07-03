@@ -67,9 +67,13 @@
         updateCart() {
             this.count = this.items.reduce((sum, item) => sum + item.quantity, 0);
             this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        },
+        clearCart() {
+            this.items = [];
+            this.updateCart();
         }
     }
-}" x-init="$store.cart = cart">
+}" x-init="$store.cart = cart" @order-placed.window="$store.cart.clearCart()">
     <!-- Header -->
     <header class="bg-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3">
@@ -126,7 +130,9 @@
                                             <span>Total:</span>
                                             <span x-text="'Rp ' + $store.cart.total.toLocaleString('id-ID')"></span>
                                         </div>
-                                        <button @click="$dispatch('open-checkout')"
+                                        {{-- Mengirimkan data 'items' dan 'total' dari cart Alpine.js saat event di-dispatch --}}
+                                        <button
+                                            @click="$dispatch('open-checkout', { items: $store.cart.items, total: $store.cart.total })"
                                             class="w-full bg-green-600 text-white py-2 rounded-lg mt-4 hover:bg-green-700 transition-colors">
                                             Checkout
                                         </button>

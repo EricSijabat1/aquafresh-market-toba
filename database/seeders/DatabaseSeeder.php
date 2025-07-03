@@ -23,12 +23,12 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Ikan Segar',
                 'description' => 'Ikan segar langsung dari nelayan',
-                'image' => 'categories/ikan-segar.jpg'
+                'image' => 'categories/ikan-segar/Ikan-Batak-Segar.jpg'
             ],
             [
                 'name' => 'Olahan Ikan',
                 'description' => 'Berbagai macam olahan ikan siap saji',
-                'image' => 'categories/olahan-ikan.jpg'
+                'image' => 'categories/olahan-ikan/Gurame-bakar.jpg'
             ]
         ];
 
