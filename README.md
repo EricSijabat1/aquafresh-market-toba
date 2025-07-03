@@ -65,7 +65,7 @@ npm install
 1. **Buat database baru** melalui phpMyAdmin atau HeidiSQL
 2. **Jalankan migrasi database:**
    ```bash
-   php artisan migrate
+   php artisan migrate --seed
    ```
 
 ### 6. Build Assets
