@@ -48,7 +48,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
                                         <input type="text" name="name" value="{{ old('name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('name') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('name') @enderror"
                                             placeholder="Masukkan nama lengkap">
                                         @error('name')
                                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -58,7 +58,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
                                         <input type="tel" name="whatsapp" value="{{ old('whatsapp') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('whatsapp') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('whatsapp')  @enderror"
                                             placeholder="Contoh: 08123456789">
                                         @error('whatsapp')
                                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -70,7 +70,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Email (Opsional)</label>
                                         <input type="email" name="email" value="{{ old('email') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') @enderror"
                                             placeholder="nama@email.com">
                                         @error('email')
                                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -81,7 +81,7 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Telepon
                                             (Opsional)</label>
                                         <input type="tel" name="phone" value="{{ old('phone') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('phone') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('phone') @enderror"
                                             placeholder="021-1234567">
                                         @error('phone')
                                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -92,7 +92,7 @@
                                 <div class="mt-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap *</label>
                                     <textarea name="address" rows="3"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('address') border-red-500 @enderror"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('address')  @enderror"
                                         placeholder="Masukkan alamat lengkap untuk pengiriman">{{ old('address') }}</textarea>
                                     @error('address')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -138,7 +138,7 @@
                                 <h2 class="text-xl font-semibold mb-4 text-gray-900">Catatan Tambahan</h2>
 
                                 <textarea name="notes" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes')@enderror"
                                     placeholder="Tambahkan catatan khusus jika diperlukan (opsional)">{{ old('notes') }}</textarea>
                                 @error('notes')
                                     <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -157,15 +157,22 @@
                                 <div class="space-y-3 max-h-64 overflow-y-auto">
                                     @foreach ($cartItems as $item)
                                         <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-
-
+                                            @if ($item['image'])
+                                                <img src="{{ asset('storage/' . $item['image']) }}"
+                                                    alt="{{ $item['name'] }}" class="w-16 h-16 object-cover rounded-lg">
+                                            @else
+                                                <div
+                                                    class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-fish text-gray-400"></i>
+                                                </div>
+                                            @endif
                                             <div class="flex-1">
                                                 <h4 class="font-semibold text-gray-900">{{ $item['name'] }}</h4>
                                                 <p class="text-sm text-gray-600">{{ $item['quantity'] }} x Rp
                                                     {{ number_format($item['price'], 0, ',', '.') }}</p>
-                                                <p class="font-semibold text-green-600">Rp
-                                                    {{ number_format($item['subtotal'], 0, ',', '.') }}</p>
                                             </div>
+                                            <p class="font-semibold text-green-600">Rp
+                                                {{ number_format($item['subtotal'], 0, ',', '.') }}</p>
                                         </div>
                                     @endforeach
                                 </div>

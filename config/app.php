@@ -123,4 +123,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'providers' => [
+        // ... provider lainnya
+        App\Providers\AppServiceProvider::class,
+        App\Providers\CartServiceProvider::class, // <-- TAMBAHKAN INI
+    ],
+
 ];

@@ -163,10 +163,9 @@ Alpine.store('cart', {
                                         <span>Total:</span>
                                         <span x-text="'Rp ' + $store.cart.total.toLocaleString('id-ID')"></span>
                                     </div>
-                                    <button @click="goToCheckout()"
-                                        class="w-full bg-green-600 text-white py-2 rounded-lg mt-4 hover:bg-green-700 transition-colors">
+                                    <a href="{{ route('checkout.index') }}" class="w-full bg-green-600 text-white ...">
                                         Lanjut ke Checkout
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -252,20 +251,18 @@ Alpine.store('cart', {
             });
         });
         // TAMBAHKAN FUNGSI BARU INI
+        // FUNGSI UNTUK MENGARAHKAN KE HALAMAN CHECKOUT
         function goToCheckout() {
             const cart = Alpine.store('cart');
-
             if (cart.items.length === 0) {
                 alert('Keranjang Anda kosong!');
                 return;
             }
 
-            // 1. Membuat elemen form sementara
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route('checkout.index') }}'; // Route ke controller checkout
+            form.action = '{{ route('checkout.index') }}'; // Route ke controller
 
-            // 2. Menambahkan CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -273,15 +270,11 @@ Alpine.store('cart', {
             csrfInput.value = csrfToken;
             form.appendChild(csrfInput);
 
-            // 3. Menambahkan setiap item di keranjang sebagai input tersembunyi
             cart.items.forEach((item, index) => {
                 const fields = {
-                    'id': item.id,
-                    'name': item.name,
-                    'price': item.price,
-                    'quantity': item.quantity
+                    id: item.id,
+                    quantity: item.quantity
                 };
-
                 for (const property in fields) {
                     let input = document.createElement('input');
                     input.type = 'hidden';
@@ -291,20 +284,12 @@ Alpine.store('cart', {
                 }
             });
 
-            // 4. Menambahkan total
-            let totalInput = document.createElement('input');
-            totalInput.type = 'hidden';
-            totalInput.name = 'total';
-            totalInput.value = cart.total;
-            form.appendChild(totalInput);
-
-            // 5. Menambahkan form ke body dan mengirimkannya
             document.body.appendChild(form);
             form.submit();
         }
     </script>
 
-
+    @stack('scripts')
     <div x-show="$store.notification.visible" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
         x-transition:enter-end="transform translate-y-0 opacity-100 sm:translate-x-0"

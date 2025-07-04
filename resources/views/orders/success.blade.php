@@ -1,149 +1,109 @@
-{{-- resources/views/orders/success.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Pesanan Berhasil - AquaFresh Market')
+@section('title', 'Status Pesanan - AquaFresh Market')
+
+{{-- Menambahkan script Midtrans Snap.js di <head> --}}
+@push('scripts')
+    <script type="text/javascript"
+        src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ config('midtrans.client_key') }}"></script>
+@endpush
+
 
 @section('content')
-    <div class="min-h-screen bg-gray-50 py-20">
-        <div class="container mx-auto px-4">
-            <div class="max-w-2xl mx-auto">
-                <!-- Success Icon -->
-                <div class="text-center mb-8">
-                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-check text-3xl text-green-600"></i>
+<div class="min-h-screen bg-gray-50 py-12 md:py-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+            
+            <div class="p-6 md:p-8">
+                @if ($order->payment_method === 'qris' && $order->payment_status === 'pending')
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-qrcode text-3xl text-blue-600"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Satu Langkah Lagi!</h1>
+                        <p class="text-gray-600">Pesanan Anda telah kami catat. Silakan selesaikan pembayaran.</p>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Pesanan Berhasil!</h1>
-                    <p class="text-gray-600">Terima kasih telah memesan di AquaFresh Market</p>
-                </div>
-
-                <!-- Order Details -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detail Pesanan</h2>
-
-                    <div class="grid md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <p class="text-sm text-gray-600">Nomor Pesanan</p>
-                            <p class="font-bold text-lg">{{ $order->order_number }}</p>
+                @else
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-3xl text-green-600"></i>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Tanggal Pesanan</p>
-                            <p class="font-medium">{{ $order->created_at->format('d/m/Y H:i') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Status</p>
-                            <span
-                                class="inline-block px-3 py-1 text-sm font-medium rounded-full 
-                               {{ $order->status === 'pending'
-                                   ? 'bg-yellow-100 text-yellow-800'
-                                   : ($order->status === 'confirmed'
-                                       ? 'bg-blue-100 text-blue-800'
-                                       : ($order->status === 'delivered'
-                                           ? 'bg-green-100 text-green-800'
-                                           : 'bg-gray-100 text-gray-800')) }}">
-                                {{ ucfirst($order->status) }}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Total Pembayaran</p>
-                            <p class="font-bold text-lg text-green-600">Rp
-                                {{ number_format($order->total_amount, 0, ',', '.') }}</p>
-                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Pesanan Berhasil!</h1>
+                        <p class="text-gray-600">Terima kasih, pesanan Anda akan segera kami proses.</p>
                     </div>
+                @endif
 
-                    <!-- Customer Info -->
-                    <div class="border-t pt-4 mb-6">
-                        <h3 class="font-bold text-lg mb-3">Informasi Pelanggan</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-600">Nama</p>
-                                <p class="font-medium">{{ $order->customer->name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-600">WhatsApp</p>
-                                <p class="font-medium">{{ $order->customer->whatsapp }}</p>
-                            </div>
-                            @if ($order->customer->email)
-                                <div>
-                                    <p class="text-sm text-gray-600">Email</p>
-                                    <p class="font-medium">{{ $order->customer->email }}</p>
-                                </div>
-                            @endif
-                            <div class="md:col-span-2">
-                                <p class="text-sm text-gray-600">Alamat</p>
-                                <p class="font-medium">{{ $order->customer->address }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Order Items -->
-                    <div class="border-t pt-4">
-                        <h3 class="font-bold text-lg mb-3">Produk Pesanan</h3>
-                        <div class="space-y-3">
-                            @foreach ($order->orderItems as $item)
-                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div class="flex items-center">
-                                        @if ($item->product->image)
-                                            <img src="{{ asset('storage/' . $item->product->image) }}"
-                                                alt="{{ $item->product->name }}"
-                                                class="w-12 h-12 object-cover rounded mr-3">
-                                        @else
-                                            <div
-                                                class="w-12 h-12 bg-gray-300 rounded flex items-center justify-center mr-3">
-                                                <i class="fas fa-fish text-gray-500"></i>
-                                            </div>
-                                        @endif
-                                        <div>
-                                            <p class="font-medium">{{ $item->product->name }}</p>
-                                            <p class="text-sm text-gray-600">{{ $item->quantity }} x Rp
-                                                {{ number_format($item->price, 0, ',', '.') }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Ringkasan Pesanan</h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span class="text-gray-600">Nomor Pesanan</span><span class="font-medium">{{ $order->order_number }}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Tanggal</span><span class="font-medium">{{ $order->created_at->format('d/m/Y H:i') }}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Metode</span><span class="font-medium uppercase">{{ $order->payment_method }}</span></div>
+                        <div class="border-t my-2"></div>
+                        <div class="flex justify-between text-lg"><span class="font-bold">Total</span><span class="font-bold text-green-600">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span></div>
                     </div>
                 </div>
 
-                <!-- Next Steps -->
-                <div class="bg-blue-50 rounded-lg p-6 mb-6">
-                    <h3 class="font-bold text-lg mb-3 text-blue-800">Langkah Selanjutnya</h3>
-                    <div class="space-y-2 text-blue-700">
-                        <p><i class="fas fa-check-circle mr-2"></i>Pesanan Anda telah diterima</p>
-                        <p><i class="fas fa-phone mr-2"></i>Tim kami akan menghubungi Anda via WhatsApp untuk konfirmasi</p>
-                        <p><i class="fas fa-truck mr-2"></i>Produk akan disiapkan dan dikirim sesuai jadwal</p>
-                        @if ($order->payment_method === 'qris')
-                            <p><i class="fas fa-qrcode mr-2"></i>Instruksi pembayaran QRIS akan dikirim via WhatsApp</p>
+                @if ($order->payment_method === 'qris' && $order->payment_status === 'pending')
+                    <div class="text-center">
+                        <p class="text-gray-600 mb-4">Klik tombol di bawah untuk menampilkan QRIS dan menyelesaikan pembayaran.</p>
+                        <button id="pay-button" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            BAYAR SEKARANG
+                        </button>
+                    </div>
+                @else
+                    <div class="text-center">
+                        @if($order->payment_method === 'cod')
+                            <p class="text-gray-600 mb-4">Tim kami akan segera menghubungi Anda via WhatsApp untuk konfirmasi pengiriman. Mohon siapkan uang pas.</p>
+                        @else
+                             <p class="text-gray-600 mb-4">Pembayaran Anda telah kami terima. Tim kami akan segera memproses pesanan Anda.</p>
                         @endif
+                        <a href="{{ route('home') }}" class="w-full md:w-auto inline-block bg-gray-600 text-white py-3 px-8 rounded-lg font-medium hover:bg-gray-700 transition-colors">
+                            Kembali ke Beranda
+                        </a>
                     </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-4">
-                    <a href="{{ route('home') }}"
-                        class="flex-1 bg-gray-600 text-white py-3 rounded-lg font-medium text-center hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-home mr-2"></i>
-                        Kembali ke Beranda
-                    </a>
-                    <a href="{{ route('products.index') }}"
-                        class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium text-center hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-shopping-cart mr-2"></i>
-                        Belanja Lagi
-                    </a>
-                </div>
-
-                <!-- WhatsApp Contact -->
-                <div class="text-center mt-8">
-                    <p class="text-gray-600 mb-4">Butuh bantuan? Hubungi kami langsung</p>
-                    <a href="https://wa.me/6281959243545"
-                        class="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                        <i class="fab fa-whatsapp mr-2"></i>
-                        Hubungi via WhatsApp
-                    </a>
-                </div>
+                @endif
             </div>
+
         </div>
     </div>
+</div>
 @endsection
+
+{{-- Menambahkan script untuk trigger Midtrans Snap --}}
+@push('scripts')
+@if ($order->payment_method === 'qris' && $order->snap_token)
+<script type="text/javascript">
+    // Cari tombol bayar
+    var payButton = document.getElementById('pay-button');
+    payButton.addEventListener('click', function () {
+        // Panggil snap.pay() dengan snap_token dari order
+        window.snap.pay('{{ $order->snap_token }}', {
+            onSuccess: function(result){
+                /* Anda bisa me-redirect ke halaman lain atau menampilkan pesan sukses */
+                alert("Pembayaran sukses!"); console.log(result);
+                window.location.reload(); // Muat ulang halaman untuk update status
+            },
+            onPending: function(result){
+                /* Pelanggan belum menyelesaikan pembayaran */
+                alert("Menunggu pembayaran Anda!"); console.log(result);
+            },
+            onError: function(result){
+                /* Terjadi error */
+                alert("Pembayaran gagal!"); console.log(result);
+            },
+            onClose: function(){
+                /* Pelanggan menutup pop-up tanpa menyelesaikan pembayaran */
+                alert('Anda menutup pop-up tanpa menyelesaikan pembayaran');
+            }
+        });
+    });
+
+    // Otomatis klik tombol bayar saat halaman dimuat
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     payButton.click();
+    // });
+</script>
+@endif
+@endpush
