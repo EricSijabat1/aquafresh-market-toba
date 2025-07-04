@@ -152,7 +152,7 @@ class CheckoutComponent extends Component
     private function sendWhatsAppMessage($order)
     {
         try {
-            $adminWhatsApp = env('ADMIN_WHATSAPP_NUMBER', '6281959243545');
+            $adminWhatsApp = config('services.whatsapp.admin_number', '6281959243545');
 
             $message = "*PESANAN BARU - AquaFresh Market*\n\n";
             $message .= "📝 *Nomor Pesanan:* {$order->order_number}\n";

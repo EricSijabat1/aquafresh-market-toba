@@ -34,7 +34,6 @@ Route::get('/checkout', function () {
     return redirect()->route('products.index')->with('error', 'Silakan pilih produk terlebih dahulu.');
 })->name('checkout.show');
 
-Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 
 Route::post('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout/process', [CheckoutController::class, 'store'])->name('checkout.store');

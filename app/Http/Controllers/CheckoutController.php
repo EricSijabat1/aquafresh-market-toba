@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -19,12 +20,11 @@ class CheckoutController extends Controller
     /**
      * Mengatur konfigurasi Midtrans setiap kali controller ini digunakan.
      */
-    public function __construct()
+    protected $orderService;
+
+    public function __construct(OrderService $orderService) // <-- Inject service
     {
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = config('midtrans.is_production');
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        $this->orderService = $orderService;
     }
 
     /**
@@ -124,68 +124,7 @@ class CheckoutController extends Controller
         ]);
 
         try {
-            $order = DB::transaction(function () use ($validatedData, $request) {
-                $customer = Customer::updateOrCreate(
-                    ['whatsapp' => $validatedData['whatsapp']],
-                    [
-                        'name' => $validatedData['name'],
-                        'email' => $validatedData['email'],
-                        'phone' => $validatedData['phone'],
-                        'address' => $validatedData['address'],
-                    ]
-                );
-
-                $totalAmount = 0;
-                foreach ($validatedData['items'] as $item) {
-                    $product = Product::find($item['id']);
-                    $totalAmount += $product->price * $item['quantity'];
-                }
-
-                $order = Order::create([
-                    'customer_id' => $customer->id,
-                    'order_number' => Order::generateOrderNumber(),
-                    'total_amount' => $totalAmount,
-                    'status' => 'pending',
-                    'notes' => $validatedData['notes'],
-                    'payment_method' => $validatedData['payment_method'],
-                    'payment_status' => 'pending',
-                ]);
-
-                foreach ($validatedData['items'] as $item) {
-                    $product = Product::find($item['id']);
-                    if ($product->stock < $item['quantity']) {
-                        throw new \Exception("Stok {$product->name} tidak mencukupi.");
-                    }
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'quantity' => $item['quantity'],
-                        'price' => $product->price,
-                        'subtotal' => $product->price * $item['quantity'],
-                    ]);
-                    $product->decrement('stock', $item['quantity']);
-                }
-
-                if ($order->payment_method === 'qris') {
-                    $params = [
-                        'transaction_details' => [
-                            'order_id' => $order->order_number,
-                            'gross_amount' => $order->total_amount,
-                        ],
-                        'customer_details' => [
-                            'first_name' => $customer->name,
-                            'email' => $customer->email,
-                            'phone' => $customer->whatsapp,
-                        ]
-                    ];
-
-                    $snapToken = Snap::getSnapToken($params);
-                    $order->snap_token = $snapToken;
-                    $order->save();
-                }
-
-                return $order;
-            });
+            $order = $this->orderService->createOrder($validatedData);
 
             $this->sendWhatsAppMessage($order);
 

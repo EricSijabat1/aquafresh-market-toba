@@ -38,14 +38,7 @@
                                         <span class="text-sm text-gray-500">{{ $product->weight }} kg</span>
                                     @endif
                                 </div>
-                                <form action="{{ route('cart.add') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                        <i class="fas fa-cart-plus mr-2"></i>
-                                        Tambah ke Keranjang
-                                    </button>
-                                </form>
+                                <livewire:add-to-cart-button :productId="$product->id" :key="$product->id" />
                             </div>
                         </div>
                     @endforeach

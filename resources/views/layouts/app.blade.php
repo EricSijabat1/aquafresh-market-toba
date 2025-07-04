@@ -124,52 +124,7 @@ Alpine.store('cart', {
                 </nav>
 
                 <div class="flex items-center space-x-4">
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" :class="atTop ? 'text-white' : 'text-gray-700'"
-                            class="bg-transparent px-4 py-2 rounded-lg hover:bg-transparent transition-colors">
-                            <i class="fas fa-shopping-cart mr-2"></i>
-                            Keranjang (<span x-text="$store.cart.count">0</span>)
-                        </button>
-
-                        <div x-show="open" @click.away="open = false" x-transition
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border text-gray-800">
-                            <div class="p-4">
-                                <h3 class="font-bold text-lg mb-4">Keranjang Belanja</h3>
-
-                                <div x-show="$store.cart.items.length === 0" class="text-gray-500 text-center py-8">
-                                    Belum ada produk di keranjang.
-                                </div>
-
-                                <div x-show="$store.cart.items.length > 0" class="max-h-64 overflow-y-auto pr-2">
-                                    <template x-for="item in $store.cart.items" :key="item.id">
-                                        <div class="flex items-center justify-between py-2 border-b">
-                                            <div class="flex-1">
-                                                <div class="font-semibold text-sm" x-text="item.name"></div>
-                                                <div class="text-xs text-gray-600">
-                                                    <span x-text="item.quantity"></span> x
-                                                    <span x-text="'Rp ' + item.price.toLocaleString('id-ID')"></span>
-                                                </div>
-                                            </div>
-                                            <button @click="$store.cart.remove(item.id)"
-                                                class="text-red-500 hover:text-red-700 ml-4 px-2">
-                                                <i class="fas fa-trash-alt fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-
-                                <div x-show="$store.cart.items.length > 0" class="mt-4 pt-4 border-t">
-                                    <div class="flex justify-between font-bold text-lg">
-                                        <span>Total:</span>
-                                        <span x-text="'Rp ' + $store.cart.total.toLocaleString('id-ID')"></span>
-                                    </div>
-                                    <a href="{{ route('checkout.index') }}" class="w-full bg-green-600 text-white ...">
-                                        Lanjut ke Checkout
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <livewire:cart-counter />
 
                     <div class="md:hidden">
                         <button :class="atTop ? 'text-white' : 'text-gray-700'" class="hover:text-blue-600">
@@ -227,7 +182,6 @@ Alpine.store('cart', {
         </div>
     </footer>
 
-    @livewireScripts
     @livewireScripts
 
     <script>
