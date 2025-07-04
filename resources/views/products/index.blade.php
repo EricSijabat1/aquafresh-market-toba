@@ -53,5 +53,4 @@
         </div>
     </section>
 
-    @livewire('checkout-component')
 @endsection

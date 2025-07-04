@@ -17,6 +17,7 @@ class Order extends Model
         'notes',
         'payment_method',
         'payment_status',
+        'snap_token', // <-- TAMBAHKAN INI
     ];
 
     protected $casts = [
@@ -43,12 +44,12 @@ class Order extends Model
     {
         $prefix = 'AF'; // AquaFresh
         $date = date('ymd'); // Format: YYMMDD
-        
+
         // Cari order terakhir hari ini
         $lastOrder = static::where('order_number', 'like', $prefix . $date . '%')
-                           ->orderBy('order_number', 'desc')
-                           ->first();
-        
+            ->orderBy('order_number', 'desc')
+            ->first();
+
         if ($lastOrder) {
             // Ambil nomor urut terakhir dan tambahkan 1
             $lastNumber = (int) substr($lastOrder->order_number, -4);
@@ -57,10 +58,10 @@ class Order extends Model
             // Jika belum ada order hari ini, mulai dari 1
             $newNumber = 1;
         }
-        
+
         // Format nomor urut menjadi 4 digit
         $sequence = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
-        
+
         return $prefix . $date . $sequence;
     }
 }

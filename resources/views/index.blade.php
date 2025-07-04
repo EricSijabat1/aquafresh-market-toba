@@ -151,6 +151,5 @@
         </div>
     </section>
 
-    <!-- Livewire Checkout Component -->
-    @livewire('checkout-component')
+
 @endsection

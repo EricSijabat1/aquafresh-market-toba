@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class OrderController extends Controller
 {
@@ -80,7 +81,17 @@ class OrderController extends Controller
 
     public function success(Order $order)
     {
-        return view('orders.success', compact('order'));
+        $qrCode = null;
+
+        // Jika metode pembayaran adalah COD, buat QR Code
+        if ($order->payment_method === 'cod') {
+            // Data yang akan di-encode di dalam QR Code adalah nomor pesanan
+            $qrCodeData = $order->order_number;
+            $qrCode = QrCode::size(250)->generate($qrCodeData);
+        }
+
+        // Kirim data order dan QR Code (jika ada) ke view
+        return view('orders.success', compact('order', 'qrCode'));
     }
 
     public function history($whatsapp)

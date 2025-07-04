@@ -122,7 +122,7 @@
                                             {{ old('payment_method') == 'qris' ? 'checked' : '' }}
                                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                         <div class="ml-3">
-                                            <div class="font-medium text-gray-900">QRIS</div>
+                                            <div class="font-medium text-gray-900">Transfer</div>
                                             <div class="text-sm text-gray-500">Scan QR code untuk pembayaran</div>
                                         </div>
                                     </label>
@@ -138,7 +138,7 @@
                                 <h2 class="text-xl font-semibold mb-4 text-gray-900">Catatan Tambahan</h2>
 
                                 <textarea name="notes" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes')@enderror"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') @enderror"
                                     placeholder="Tambahkan catatan khusus jika diperlukan (opsional)">{{ old('notes') }}</textarea>
                                 @error('notes')
                                     <span class="text-red-500 text-sm">{{ $message }}</span>
