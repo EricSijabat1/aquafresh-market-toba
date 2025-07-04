@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CartItem;
+use App\Models\Product; // <-- TAMBAHKAN use statement ini
 use Livewire\Component;
 
 class AddToCartButton extends Component
@@ -32,10 +33,13 @@ class AddToCartButton extends Component
             ]);
         }
 
+        $product = Product::find($this->productId); // Ambil data produk
+
         // Mengirim event 'cart-updated' yang akan ditangkap oleh CartCounter
         $this->dispatch('cart-updated');
-        // Mengirim event untuk notifikasi
-        $this->dispatch('notify', ['message' => 'Produk berhasil ditambahkan!']);
+
+        // Mengirim event untuk notifikasi dengan format yang benar
+        $this->dispatch('notify', message: "'{$product->name}' berhasil ditambahkan ke keranjang!");
     }
 
     public function render()

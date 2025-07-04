@@ -21,9 +21,12 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/category/{category}', [ProductController::class, 'category'])->name('products.category');
 
+// Route untuk Keranjang (Hapus `cart.add` karena sudah dihandle Livewire)
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::patch('/cart/{cartItemId}/update', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{cartItemId}/remove', [CartController::class, 'remove'])->name('cart.remove');
 // Route untuk Keranjang
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); // <-- TAMBAHKAN ROUTE INI
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/{order}/success', [OrderController::class, 'success'])->name('orders.success');
 Route::get('/customer/{whatsapp}/orders', [OrderController::class, 'history'])->name('orders.history');
@@ -34,9 +37,10 @@ Route::get('/checkout', function () {
     return redirect()->route('products.index')->with('error', 'Silakan pilih produk terlebih dahulu.');
 })->name('checkout.show');
 
-
-Route::post('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/process', [CheckoutController::class, 'store'])->name('checkout.store');
+// GET request akan menampilkan halaman checkout
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+// POST request akan memproses order
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
 // Midtrans Webhook
 Route::post('/midtrans/webhook', [WebhookController::class, 'handle']);

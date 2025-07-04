@@ -22,32 +22,28 @@ class CheckoutController extends Controller
      */
     protected $orderService;
 
-    public function __construct(OrderService $orderService) // <-- Inject service
+    public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
     }
 
-    /**
-     * Menampilkan halaman checkout dengan data dari keranjang.
-     * Method ini dipanggil via POST dari JavaScript dengan data cart.
-     */
-    public function index()
+    public function index() // Method ini untuk menampilkan halaman checkout
     {
-        $sessionId = session()->getId();
-        $cartData = CartItem::with('product')->where('session_id', $sessionId)->get();
+        $cartItemsData = CartItem::with('product')->where('session_id', session()->getId())->get();
 
-        if ($cartData->isEmpty()) {
-            return redirect()->route('home')->with('error', 'Keranjang Anda kosong!');
+        if ($cartItemsData->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Keranjang Anda kosong!');
         }
 
         $cartItems = [];
         $total = 0;
 
-        foreach ($cartData as $item) {
-            // Cek stok
+        foreach ($cartItemsData as $item) {
+            if (!$item->product) continue; // Skip jika produk terhapus
+
             if ($item->product->stock < $item->quantity) {
-                return redirect()->route('home') // atau ke halaman keranjang nanti
-                    ->with('error', "Stok produk {$item->product->name} tidak mencukupi.");
+                return redirect()->route('cart.index')
+                    ->with('error', "Stok produk {$item->product->name} tidak mencukupi. Sisa stok: {$item->product->stock}.");
             }
 
             $subtotal = $item->product->price * $item->quantity;
@@ -65,50 +61,7 @@ class CheckoutController extends Controller
         return view('checkout.index', compact('cartItems', 'total'));
     }
 
-    /**
-     * Menampilkan halaman checkout untuk GET request.
-     * Biasanya digunakan ketika user mengakses URL langsung.
-     */
-    public function show(Request $request)
-    {
-        // Jika ada session cart data, gunakan itu
-        if ($request->session()->has('checkout_cart')) {
-            $cartData = $request->session()->get('checkout_cart');
-
-            $cartItems = [];
-            $total = 0;
-
-            foreach ($cartData['items'] as $item) {
-                $product = Product::find($item['id']);
-
-                if (!$product) {
-                    continue; // Skip jika produk tidak ditemukan
-                }
-
-                $subtotal = $product->price * $item['quantity'];
-                $cartItems[] = [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price,
-                    'quantity' => $item['quantity'],
-                    'image' => $product->image,
-                    'subtotal' => $subtotal,
-                ];
-                $total += $subtotal;
-            }
-
-            return view('checkout.index', compact('cartItems', 'total'));
-        }
-
-        // Jika tidak ada data cart, redirect ke halaman produk
-        return redirect()->route('products.index')
-            ->with('error', 'Silakan pilih produk terlebih dahulu.');
-    }
-
-    /**
-     * Menyimpan data pesanan dan memproses pembayaran.
-     */
-    public function store(Request $request)
+    public function store(Request $request) // Method ini untuk memproses pesanan
     {
         $validatedData = $request->validate([
             'name' => 'required|string|min:3|max:255',
@@ -118,19 +71,27 @@ class CheckoutController extends Controller
             'phone' => 'nullable|string|min:10|max:20',
             'notes' => 'nullable|string|max:500',
             'payment_method' => 'required|in:cod,qris',
-            'items' => 'required|array|min:1',
-            'items.*.id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1'
         ]);
+
+        $cartItems = CartItem::where('session_id', session()->getId())->get();
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('home')->with('error', 'Sesi checkout berakhir. Silakan coba lagi.');
+        }
+
+        // Tambahkan item keranjang ke data yang divalidasi
+        $validatedData['items'] = $cartItems->map(function ($item) {
+            return ['id' => $item->product_id, 'quantity' => $item->quantity];
+        })->toArray();
 
         try {
             $order = $this->orderService->createOrder($validatedData);
 
-            $this->sendWhatsAppMessage($order);
+            // Kosongkan keranjang setelah order berhasil
+            CartItem::where('session_id', session()->getId())->delete();
 
-            // Clear checkout session data
-            $request->session()->forget('checkout_cart');
+            $this->sendWhatsAppMessage($order); // Fungsi ini sudah bagus
 
+            // Redirect ke halaman sukses
             return redirect()->route('orders.success', $order)
                 ->with('success', 'Pesanan berhasil dibuat!');
         } catch (\Exception $e) {

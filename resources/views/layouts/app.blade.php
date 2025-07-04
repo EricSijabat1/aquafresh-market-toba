@@ -49,48 +49,7 @@ Alpine.store('notification', {
         if (this.timer) clearTimeout(this.timer);
         this.timer = setTimeout(() => { this.visible = false }, 3000);
     }
-});
-
-// Membuat Global Store untuk Keranjang
-Alpine.store('cart', {
-    items: [],
-    count: 0,
-    total: 0,
-
-    add(product) {
-        let existingItem = this.items.find(item => item.id === product.id);
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            this.items.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: 1,
-                image: product.image
-            });
-        }
-        this.updateCart();
-
-        // Panggil notifikasi store secara langsung
-        Alpine.store('notification').show(`${product.name} telah ditambahkan ke keranjang!`);
-    },
-
-    remove(id) {
-        this.items = this.items.filter(item => item.id !== id);
-        this.updateCart();
-    },
-
-    updateCart() {
-        this.count = this.items.reduce((sum, item) => sum + item.quantity, 0);
-        this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    },
-
-    clearCart() {
-        this.items = [];
-        this.updateCart();
-    }
-});" @order-placed.window="$store.cart.clearCart()">
+});">
     <header x-data="{ atTop: true }"
         @scroll.window="
             const hero = document.getElementById('hero-section');
@@ -205,42 +164,20 @@ Alpine.store('cart', {
             });
         });
         // TAMBAHKAN FUNGSI BARU INI
-        // FUNGSI UNTUK MENGARAHKAN KE HALAMAN CHECKOUT
-        function goToCheckout() {
-            const cart = Alpine.store('cart');
-            if (cart.items.length === 0) {
-                alert('Keranjang Anda kosong!');
-                return;
-            }
-
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route('checkout.index') }}'; // Route ke controller
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_token';
-            csrfInput.value = csrfToken;
-            form.appendChild(csrfInput);
-
-            cart.items.forEach((item, index) => {
-                const fields = {
-                    id: item.id,
-                    quantity: item.quantity
-                };
-                for (const property in fields) {
-                    let input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = `items[${index}][${property}]`;
-                    input.value = fields[property];
-                    form.appendChild(input);
-                }
+        // Jembatan event Livewire ke Alpine.js
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('notify', (event) => {
+                // Panggil Alpine store yang sudah ada
+                Alpine.store('notification').show(event.message);
             });
 
-            document.body.appendChild(form);
-            form.submit();
-        }
+            // Listener untuk membersihkan keranjang setelah pesanan sukses
+            // Ini akan dipanggil dari CheckoutController
+            Livewire.on('cart-cleared', () => {
+                // Dispatch event Livewire untuk mengupdate counter
+                Livewire.dispatch('cart-updated');
+            });
+        });
     </script>
 
     @stack('scripts')
