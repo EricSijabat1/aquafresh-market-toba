@@ -4,22 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'AquaFresh Market')</title>
     <meta name="description" content="@yield('description', 'Ikan segar dan olahan berkualitas tinggi langsung dari nelayan')">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Alpine.js -->
+    <script src="https://unpkg.com/@alpinejs/intersect@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-    <!-- Livewire -->
     @livewireStyles
 
-    <!-- Custom Styles -->
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -31,7 +28,7 @@
 
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .fish-pattern {
@@ -40,111 +37,143 @@
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="{
-    cart: {
-        items: [],
-        count: 0,
-        total: 0,
-        add(product) {
-            let existingItem = this.items.find(item => item.id === product.id);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                this.items.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1,
-                    image: product.image
-                });
-            }
-            this.updateCart();
-        },
-        remove(id) {
-            this.items = this.items.filter(item => item.id !== id);
-            this.updateCart();
-        },
-        updateCart() {
-            this.count = this.items.reduce((sum, item) => sum + item.quantity, 0);
-            this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        },
-        clearCart() {
-            this.items = [];
-            this.updateCart();
-        }
+<body class="bg-gray-50" x-data x-init="// Membuat Global Store untuk Notifikasi
+Alpine.store('notification', {
+    visible: false,
+    message: '',
+    timer: null,
+
+    show(message) {
+        this.visible = true;
+        this.message = message;
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => { this.visible = false }, 3000);
     }
-}" x-init="$store.cart = cart" @order-placed.window="$store.cart.clearCart()">
-    <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50">
+});
+
+// Membuat Global Store untuk Keranjang
+Alpine.store('cart', {
+    items: [],
+    count: 0,
+    total: 0,
+
+    add(product) {
+        let existingItem = this.items.find(item => item.id === product.id);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            this.items.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                image: product.image
+            });
+        }
+        this.updateCart();
+
+        // Panggil notifikasi store secara langsung
+        Alpine.store('notification').show(`${product.name} telah ditambahkan ke keranjang!`);
+    },
+
+    remove(id) {
+        this.items = this.items.filter(item => item.id !== id);
+        this.updateCart();
+    },
+
+    updateCart() {
+        this.count = this.items.reduce((sum, item) => sum + item.quantity, 0);
+        this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    },
+
+    clearCart() {
+        this.items = [];
+        this.updateCart();
+    }
+});" @order-placed.window="$store.cart.clearCart()">
+    <header x-data="{ atTop: true }"
+        @scroll.window="
+            const hero = document.getElementById('hero-section');
+            if (hero) {
+                atTop = (window.pageYOffset < (hero.offsetHeight - 80));
+            } else {
+                atTop = (window.pageYOffset < 50);
+            }
+        "
+        :class="{
+            'bg-white/90 shadow-lg backdrop-blur-md': !atTop,
+            'bg-black/20 backdrop-blur-md': atTop
+        }"
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+
         <div class="container mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-blue-600">
-                        <i class="fas fa-fish mr-2"></i>
-                        AquaFresh Market
-                    </a>
-                </div>
+                <a href="{{ route('home') }}" class="text-2xl font-bold transition-colors"
+                    :class="atTop ? 'text-white' : 'text-black'">
+
+                    AquaFresh Market
+                </a>
 
                 <nav class="hidden md:flex space-x-8">
-                    <a href="{{ route('home') }}"
-                        class="text-gray-700 hover:text-blue-600 transition-colors">Beranda</a>
-                    <a href="{{ route('products.index') }}"
-                        class="text-gray-700 hover:text-blue-600 transition-colors">Produk</a>
-                    <a href="#contact" class="text-gray-700 hover:text-blue-600 transition-colors">Kontak</a>
+                    <a href="{{ route('home') }}" class="font-medium transition-colors hover:text-blue-300"
+                        :class="atTop ? 'text-white' : 'text-gray-700'">Beranda</a>
+                    <a href="{{ route('products.index') }}" class="font-medium transition-colors hover:text-blue-300"
+                        :class="atTop ? 'text-white' : 'text-gray-700'">Produk</a>
+                    <a href="#contact" class="font-medium transition-colors hover:text-blue-300"
+                        :class="atTop ? 'text-white' : 'text-gray-700'">Kontak</a>
                 </nav>
 
                 <div class="flex items-center space-x-4">
-                    <!-- Cart Dropdown -->
                     <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <button @click="open = !open" :class="atTop ? 'text-white' : 'text-gray-700'"
+                            class="bg-transparent px-4 py-2 rounded-lg hover:bg-transparent transition-colors">
                             <i class="fas fa-shopping-cart mr-2"></i>
                             Keranjang (<span x-text="$store.cart.count">0</span>)
                         </button>
 
                         <div x-show="open" @click.away="open = false" x-transition
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border">
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border text-gray-800">
                             <div class="p-4">
                                 <h3 class="font-bold text-lg mb-4">Keranjang Belanja</h3>
+
                                 <div x-show="$store.cart.items.length === 0" class="text-gray-500 text-center py-8">
-                                    Keranjang kosong
+                                    Belum ada produk di keranjang.
                                 </div>
-                                <div x-show="$store.cart.items.length > 0">
+
+                                <div x-show="$store.cart.items.length > 0" class="max-h-64 overflow-y-auto pr-2">
                                     <template x-for="item in $store.cart.items" :key="item.id">
                                         <div class="flex items-center justify-between py-2 border-b">
                                             <div class="flex-1">
-                                                <div class="font-semibold" x-text="item.name"></div>
-                                                <div class="text-sm text-gray-600">
+                                                <div class="font-semibold text-sm" x-text="item.name"></div>
+                                                <div class="text-xs text-gray-600">
                                                     <span x-text="item.quantity"></span> x
                                                     <span x-text="'Rp ' + item.price.toLocaleString('id-ID')"></span>
                                                 </div>
                                             </div>
                                             <button @click="$store.cart.remove(item.id)"
-                                                class="text-red-500 hover:text-red-700">
-                                                <i class="fas fa-trash"></i>
+                                                class="text-red-500 hover:text-red-700 ml-4 px-2">
+                                                <i class="fas fa-trash-alt fa-sm"></i>
                                             </button>
                                         </div>
                                     </template>
-                                    <div class="mt-4 pt-4 border-t">
-                                        <div class="flex justify-between font-bold text-lg">
-                                            <span>Total:</span>
-                                            <span x-text="'Rp ' + $store.cart.total.toLocaleString('id-ID')"></span>
-                                        </div>
-                                        {{-- Mengirimkan data 'items' dan 'total' dari cart Alpine.js saat event di-dispatch --}}
-                                        <button
-                                            @click="$dispatch('open-checkout', { items: $store.cart.items, total: $store.cart.total })"
-                                            class="w-full bg-green-600 text-white py-2 rounded-lg mt-4 hover:bg-green-700 transition-colors">
-                                            Checkout
-                                        </button>
+                                </div>
+
+                                <div x-show="$store.cart.items.length > 0" class="mt-4 pt-4 border-t">
+                                    <div class="flex justify-between font-bold text-lg">
+                                        <span>Total:</span>
+                                        <span x-text="'Rp ' + $store.cart.total.toLocaleString('id-ID')"></span>
                                     </div>
+                                    <button @click="goToCheckout()"
+                                        class="w-full bg-green-600 text-white py-2 rounded-lg mt-4 hover:bg-green-700 transition-colors">
+                                        Lanjut ke Checkout
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Mobile Menu Button -->
                     <div class="md:hidden">
-                        <button class="text-gray-700 hover:text-blue-600">
+                        <button :class="atTop ? 'text-white' : 'text-gray-700'" class="hover:text-blue-600">
                             <i class="fas fa-bars"></i>
                         </button>
                     </div>
@@ -153,12 +182,10 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         @yield('content')
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="grid md:grid-cols-4 gap-8">
@@ -170,7 +197,6 @@
                     <p class="text-gray-400">Menyediakan ikan segar dan olahan berkualitas tinggi untuk keluarga
                         Indonesia.</p>
                 </div>
-
                 <div>
                     <h3 class="font-bold text-lg mb-4">Produk</h3>
                     <ul class="space-y-2 text-gray-400">
@@ -179,7 +205,6 @@
                         <li><a href="{{ route('products.index') }}" class="hover:text-white">Produk Baru</a></li>
                     </ul>
                 </div>
-
                 <div>
                     <h3 class="font-bold text-lg mb-4">Layanan</h3>
                     <ul class="space-y-2 text-gray-400">
@@ -188,7 +213,6 @@
                         <li><a href="#" class="hover:text-white">Riwayat Pesanan</a></li>
                     </ul>
                 </div>
-
                 <div>
                     <h3 class="font-bold text-lg mb-4">Kontak</h3>
                     <ul class="space-y-2 text-gray-400">
@@ -198,18 +222,17 @@
                     </ul>
                 </div>
             </div>
-
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
                 <p>&copy; {{ date('Y') }} AquaFresh Market. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Livewire Scripts -->
+    @livewireScripts
     @livewireScripts
 
-    <!-- Custom Scripts -->
     <script>
+        // ... fungsi formatCurrency dan smooth scrolling Anda ...
         // Format currency
         function formatCurrency(amount) {
             return new Intl.NumberFormat('id-ID', {
@@ -228,7 +251,71 @@
                 });
             });
         });
+        // TAMBAHKAN FUNGSI BARU INI
+        function goToCheckout() {
+            const cart = Alpine.store('cart');
+
+            if (cart.items.length === 0) {
+                alert('Keranjang Anda kosong!');
+                return;
+            }
+
+            // 1. Membuat elemen form sementara
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('checkout.index') }}'; // Route ke controller checkout
+
+            // 2. Menambahkan CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // 3. Menambahkan setiap item di keranjang sebagai input tersembunyi
+            cart.items.forEach((item, index) => {
+                const fields = {
+                    'id': item.id,
+                    'name': item.name,
+                    'price': item.price,
+                    'quantity': item.quantity
+                };
+
+                for (const property in fields) {
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `items[${index}][${property}]`;
+                    input.value = fields[property];
+                    form.appendChild(input);
+                }
+            });
+
+            // 4. Menambahkan total
+            let totalInput = document.createElement('input');
+            totalInput.type = 'hidden';
+            totalInput.name = 'total';
+            totalInput.value = cart.total;
+            form.appendChild(totalInput);
+
+            // 5. Menambahkan form ke body dan mengirimkannya
+            document.body.appendChild(form);
+            form.submit();
+        }
     </script>
+
+
+    <div x-show="$store.notification.visible" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="transform translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        x-transition:enter-end="transform translate-y-0 opacity-100 sm:translate-x-0"
+        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed top-20 right-5 z-50 bg-yellow-500 text-white py-3 px-6 rounded-lg shadow-lg flex items-center"
+        style="display: none;">
+
+        <i class="fas fa-check-circle mr-3"></i>
+        <span x-text="$store.notification.message"></span>
+    </div>
 </body>
 
 </html>

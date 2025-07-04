@@ -25,8 +25,9 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
-        
-        DB::transaction(function () use ($request) {
+
+        // 1. Tampung hasil dari transaksi ke dalam variabel $order
+        $order = DB::transaction(function () use ($request) {
             // Create or update customer
             $customer = Customer::updateOrCreate(
                 ['whatsapp' => $request->whatsapp],
@@ -37,59 +38,61 @@ class OrderController extends Controller
                     'address' => $request->address,
                 ]
             );
-            
-            // Create order
-            $order = Order::create([
+
+            // Create order (gunakan nama variabel sementara jika perlu)
+            $createdOrder = Order::create([
                 'customer_id' => $customer->id,
                 'order_number' => Order::generateOrderNumber(),
                 'total_amount' => 0,
                 'status' => 'pending',
                 'notes' => $request->notes,
             ]);
-            
+
             $totalAmount = 0;
-            
+
             // Create order items
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 $subtotal = $product->price * $item['quantity'];
-                
+
                 OrderItem::create([
-                    'order_id' => $order->id,
+                    'order_id' => $createdOrder->id,
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'price' => $product->price,
                     'subtotal' => $subtotal,
                 ]);
-                
+
                 $totalAmount += $subtotal;
             }
-            
+
             // Update order total
-            $order->update(['total_amount' => $totalAmount]);
-            
-            $this->order = $order;
+            $createdOrder->update(['total_amount' => $totalAmount]);
+
+            // 2. Kembalikan objek order yang sudah lengkap dari dalam transaksi
+            return $createdOrder;
         });
-        
-        return redirect()->route('orders.success', $this->order)
+
+        // 3. Sekarang variabel $order di sini berisi data dari $createdOrder
+        return redirect()->route('orders.success', $order)
             ->with('success', 'Pesanan berhasil dibuat! Kami akan menghubungi Anda segera.');
     }
-    
+
     public function success(Order $order)
     {
         return view('orders.success', compact('order'));
     }
-    
+
     public function history($whatsapp)
     {
         $customer = Customer::where('whatsapp', $whatsapp)->first();
-        
+
         if (!$customer) {
             return redirect()->route('home')->with('error', 'Riwayat pesanan tidak ditemukan.');
         }
-        
+
         $orders = $customer->orders()->with('orderItems.product')->latest()->paginate(10);
-        
+
         return view('orders.history', compact('customer', 'orders'));
     }
 }
