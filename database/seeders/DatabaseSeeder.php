@@ -11,68 +11,104 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin user
+        // Membuat pengguna admin
         User::factory()->create([
             'name' => 'Admin AquaFresh',
             'email' => 'admin@aquafresh.com',
-            'password' => bcrypt('password')
+            'password' => bcrypt('password') // Harap ganti 'password' dengan password yang lebih aman
         ]);
 
-        // Create categories
-        $categories = [
-            [
-                'name' => 'Ikan Segar',
-                'description' => 'Ikan segar langsung dari nelayan',
-                'image' => 'categories/ikan-segar/Ikan-Batak-Segar.jpg'
-            ],
-            [
-                'name' => 'Olahan Ikan',
-                'description' => 'Berbagai macam olahan ikan siap saji',
-                'image' => 'categories/olahan-ikan/Gurame-bakar.jpg'
-            ]
-        ];
+        // Membuat kategori
+        // Kategori ID 1
+        Category::create([
+            'name' => 'Ikan Segar',
+            'description' => 'Ikan segar langsung dari nelayan Danau Toba.',
+            'image' => 'categories/ikan-segar/Ikan-Batak-Segar.jpg'
+        ]);
 
-        foreach ($categories as $category) {
-            Category::create($category);
-        }
+        // Kategori ID 2
+        Category::create([
+            'name' => 'Olahan Ikan',
+            'description' => 'Berbagai macam olahan ikan siap saji khas Batak.',
+            'image' => 'categories/olahan-ikan/Gurame-bakar.jpg'
+        ]);
 
-        // Create sample products
+        // --- DATA PRODUK BARU SESUAI GAMBAR ANDA ---
         $products = [
+            // Produk untuk Kategori "Ikan Segar" (category_id = 1)
             [
                 'category_id' => 1,
-                'name' => 'Ikan Salmon Segar',
-                'description' => 'Ikan salmon segar impor dengan kualitas premium',
-                'price' => 150000,
-                'stock' => 20,
+                'name' => 'Ikan Mas Segar',
+                'description' => 'Ikan mas segar pilihan, cocok untuk diarsik atau digoreng.',
+                'price' => 55000,
+                'stock' => 30,
                 'weight' => 1.0,
-                'image' => 'products/salmon.jpg'
+                'image' => 'products/Ikan Mas Segar.jpg'
             ],
             [
                 'category_id' => 1,
-                'name' => 'Ikan Tuna Segar',
-                'description' => 'Ikan tuna segar hasil tangkapan lokal',
-                'price' => 80000,
-                'stock' => 15,
-                'weight' => 0.5,
-                'image' => 'products/tuna.jpg'
-            ],
-            [
-                'category_id' => 2,
-                'name' => 'Nugget Ikan',
-                'description' => 'Nugget ikan berkualitas untuk keluarga',
-                'price' => 25000,
+                'name' => 'Ikan Lele Segar',
+                'description' => 'Lele segar, dibudidayakan secara alami, bebas bau tanah.',
+                'price' => 35000,
                 'stock' => 50,
-                'weight' => 0.25,
-                'image' => 'products/nugget.jpg'
+                'weight' => 1.0,
+                'image' => 'products/Ikan Lele Segar.jpg'
+            ],
+            [
+                'category_id' => 1,
+                'name' => 'Ikan Batak (Ihan)',
+                'description' => 'Ikan Batak asli dari Danau Toba, sangat langka dan berkhasiat.',
+                'price' => 150000,
+                'stock' => 10,
+                'weight' => 1.0,
+                'image' => 'categories/ikan-segar/Ikan-Batak-Segar.jpg' // Menggunakan gambar dari kategori
+            ],
+            [
+                'category_id' => 1,
+                'name' => 'Ikan Jair (Mujair) Segar',
+                'description' => 'Ikan mujair segar, daging tebal dan gurih.',
+                'price' => 45000,
+                'stock' => 40,
+                'weight' => 1.0,
+                'image' => 'categories/ikan-segar/Ikan Jair Segar.jpg' // Menggunakan gambar dari kategori
+            ],
+
+            // Produk untuk Kategori "Olahan Ikan" (category_id = 2)
+            [
+                'category_id' => 2,
+                'name' => 'Arsik Ikan Mas',
+                'description' => 'Masakan khas Batak, arsik ikan mas dengan bumbu andaliman yang menggugah selera.',
+                'price' => 85000,
+                'stock' => 25,
+                'weight' => 1.2,
+                'image' => 'products/Arsik Ikan Mas.jpg'
             ],
             [
                 'category_id' => 2,
-                'name' => 'Kerupuk Ikan',
-                'description' => 'Kerupuk ikan renyah dan gurih',
-                'price' => 15000,
-                'stock' => 100,
-                'weight' => 0.1,
-                'image' => 'products/kerupuk.jpg'
+                'name' => 'Gurame Bakar',
+                'description' => 'Ikan gurame pilihan dibakar dengan bumbu spesial, disajikan dengan sambal.',
+                'price' => 75000,
+                'stock' => 30,
+                'weight' => 0.8,
+                'image' => 'products/Gurame-bakar.jpg'
+            ],
+            [
+                'category_id' => 2,
+                'name' => 'Ikan Bakar Sambal Matah',
+                'description' => 'Ikan segar yang dibakar sempurna dan disiram dengan sambal matah pedas menyegarkan.',
+                'price' => 65000,
+                'stock' => 35,
+                'weight' => 0.7,
+                'image' => 'categories/olahan-ikan/Ikan bakar sambal matah.jpg'
+            ],
+             [
+                'category_id' => 2,
+                'name' => 'Naniura',
+                'description' => 'Sashimi khas Batak, ikan mas yang dimatangkan dengan asam jungga tanpa dimasak.',
+                'price' => 95000,
+                'stock' => 15,
+                'weight' => 0.9,
+                'image' => 'categories/olahan-ikan/Ikan Naniura.jpg'
             ]
         ];
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\CartPage;
 
 
 // Public Routes
@@ -22,6 +23,8 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 Route::get('/category/{category}', [ProductController::class, 'category'])->name('products.category');
 
 // Route untuk Keranjang (Hapus `cart.add` karena sudah dihandle Livewire)
+// Tambahkan route baru ini
+Route::get('/cart', CartPage::class)->name('cart.index');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::patch('/cart/{cartItemId}/update', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{cartItemId}/remove', [CartController::class, 'remove'])->name('cart.remove');

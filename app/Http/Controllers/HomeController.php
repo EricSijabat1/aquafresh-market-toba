@@ -17,14 +17,29 @@ class HomeController extends Controller
             ->withCount('activeProducts')
             ->get();
 
-        // --- KODE PERBAIKAN ---
-        // Mengambil produk unggulan ASLI dari database
-        // Contoh: Ambil 8 produk terbaru yang aktif
-        $featuredProducts = Product::where('is_active', true)
-            ->latest() // Mengambil yang terbaru
-            ->take(8)    // Batasi 8 produk
+        // --- LOGIKA BARU UNTUK PRODUK UNGGULAN ---
+
+        // 1. Ambil 3 produk acak dari kategori 'Ikan Segar'
+        $freshFish = Product::where('is_active', true)
+            ->whereHas('category', function ($query) {
+                $query->where('name', 'Ikan Segar');
+            })
+            ->inRandomOrder() // Ambil secara acak agar bervariasi
+            ->take(3)
             ->get();
-        // --- AKHIR PERBAIKAN ---
+
+        // 2. Ambil 3 produk acak dari kategori 'Olahan Ikan'
+        $processedFish = Product::where('is_active', true)
+            ->whereHas('category', function ($query) {
+                $query->where('name', 'Olahan Ikan');
+            })
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+
+        // 3. Gabungkan kedua hasil query menjadi satu collection
+        $featuredProducts = $freshFish->merge($processedFish);
+
 
         return view('index', compact('categories', 'featuredProducts'));
     }
