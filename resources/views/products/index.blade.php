@@ -35,7 +35,7 @@
     </section>
 
     <!-- Products Section -->
-    <section class=" bg-gradient-to-b from-gray-50 to-white">
+    <section class=" bg-gradient-to-b from-gray-50 to-white mb-6">
         <div class="container mx-auto px-4">
             @if (!empty($products))
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -135,30 +135,6 @@
                     </div>
                 </div>
             @endif
-        </div>
-    </section>
-
-    <!-- Contact CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-teal-600 to-blue-600">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold text-white mb-4">
-                Butuh Bantuan Memilih Produk?
-            </h2>
-            <p class="text-teal-100 text-lg mb-8 max-w-2xl mx-auto">
-                Tim ahli kami siap membantu Anda menemukan ikan segar terbaik sesuai kebutuhan
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="https://wa.me/6281234567890"
-                    class="inline-flex items-center gap-2 bg-white text-teal-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <i class="fab fa-whatsapp text-green-500"></i>
-                    Chat WhatsApp
-                </a>
-                <a href="#contact"
-                    class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/20 hover:border-white/50 transition-all duration-300 transform hover:scale-105">
-                    <i class="fas fa-phone"></i>
-                    Hubungi Kami
-                </a>
-            </div>
         </div>
     </section>
 

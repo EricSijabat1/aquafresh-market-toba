@@ -263,45 +263,7 @@
                 </div>
             </div>
 
-            <!-- Additional Contact Info -->
-            <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Jam Operasional</h3>
-                        <div class="space-y-2 text-gray-600">
-                            <div class="flex justify-between">
-                                <span>Senin - Jumat</span>
-                                <span class="font-semibold">08:00 - 17:00</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Sabtu</span>
-                                <span class="font-semibold">08:00 - 15:00</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Minggu</span>
-                                <span class="font-semibold">Tutup</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Layanan Pengiriman</h3>
-                        <div class="space-y-2 text-gray-600">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-truck text-teal-600"></i>
-                                <span>Pengiriman Same Day (Medan)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-box text-slate-600"></i>
-                                <span>Kemasan Khusus Ikan Segar</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-snowflake text-orange-600"></i>
-                                <span>Cold Chain Delivery</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </section>
 
