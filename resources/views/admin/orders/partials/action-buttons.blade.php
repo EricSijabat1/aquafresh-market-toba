@@ -1,107 +1,36 @@
-{{-- resources/views/admin/orders/partials/action-buttons.blade.php --}}
-
-{{-- Tombol Detail --}}
-<a href="{{ route('admin.orders.show', $order) }}" 
-   class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 hover:text-blue-700 transition-colors group"
-   title="Lihat Detail">
-    <i class="fas fa-eye text-sm group-hover:scale-110 transition-transform"></i>
-</a>
-
-{{-- Tombol Edit/Update Status --}}
-<button type="button" 
-        onclick="openStatusModal({{ $order->id }})"
-        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-700 transition-colors group"
-        title="Update Status">
-    <i class="fas fa-edit text-sm group-hover:scale-110 transition-transform"></i>
-</button>
-
-{{-- Tombol Print Invoice --}}
-<a href="{{ route('admin.orders.invoice', $order) }}" 
-   target="_blank"
-   class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-600 hover:text-purple-700 transition-colors group"
-   title="Print Invoice">
-    <i class="fas fa-print text-sm group-hover:scale-110 transition-transform"></i>
-</a>
-
-{{-- Tombol More Actions (Dropdown) --}}
-<div class="relative inline-block text-left">
-    <button type="button" 
-            onclick="toggleDropdown({{ $order->id }})"
-            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 transition-colors group"
-            title="More Actions">
-        <i class="fas fa-ellipsis-v text-sm group-hover:scale-110 transition-transform"></i>
+{{-- Menggunakan Alpine.js untuk mengelola state dropdown --}}
+<div x-data="{ open: false }" @click.outside="open = false" class="relative inline-block text-left">
+    
+    {{-- Tombol untuk membuka/menutup dropdown --}}
+    <button @click="open = !open" type="button" 
+            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            title="Aksi Lainnya">
+        <i class="fas fa-ellipsis-v text-sm"></i>
     </button>
     
-    <div id="dropdown-{{ $order->id }}" 
-         class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 hidden">
-        <div class="py-1">
-            <a href="{{ route('admin.orders.show', $order) }}" 
-               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <i class="fas fa-eye mr-2"></i>
+    {{-- Konten Dropdown --}}
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="transform opacity-0 scale-95"
+         x-transition:enter-end="transform opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-75"
+         x-transition:leave-start="transform opacity-100 scale-100"
+         x-transition:leave-end="transform opacity-0 scale-95"
+         class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20"
+         style="display: none;"> {{-- `style="display: none;"` untuk mencegah FOUC --}}
+
+        <div class="py-1" role="menu" aria-orientation="vertical">
+            <a href="{{ route('admin.orders.show', $order) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                <i class="fas fa-eye w-5 mr-2 text-gray-400"></i>
                 Lihat Detail
             </a>
-            <a href="{{ route('admin.orders.edit', $order) }}" 
-               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <i class="fas fa-edit mr-2"></i>
-                Edit Pesanan
+          
+            <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                <i class="fas fa-print w-5 mr-2 text-gray-400"></i>
+                Cetak Invoice
             </a>
-            <a href="{{ route('admin.orders.invoice', $order) }}" 
-               target="_blank"
-               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <i class="fas fa-file-invoice mr-2"></i>
-                Download Invoice
-            </a>
-            <div class="border-t border-gray-100"></div>
-            @if($order->status !== 'cancelled')
-            <button onclick="cancelOrder({{ $order->id }})"
-                    class="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50">
-                <i class="fas fa-times-circle mr-2"></i>
-                Batalkan Pesanan
-            </button>
-            @endif
+            <div class="border-t border-gray-100 my-1"></div>
+          
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-// Toggle dropdown menu
-function toggleDropdown(orderId) {
-    const dropdown = document.getElementById(`dropdown-${orderId}`);
-    const allDropdowns = document.querySelectorAll('[id^="dropdown-"]');
-    
-    // Close all other dropdowns
-    allDropdowns.forEach(d => {
-        if (d.id !== `dropdown-${orderId}`) {
-            d.classList.add('hidden');
-        }
-    });
-    
-    // Toggle current dropdown
-    dropdown.classList.toggle('hidden');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const isDropdownButton = event.target.closest('[onclick*="toggleDropdown"]');
-    if (!isDropdownButton) {
-        const allDropdowns = document.querySelectorAll('[id^="dropdown-"]');
-        allDropdowns.forEach(d => d.classList.add('hidden'));
-    }
-});
-
-// Open status modal
-function openStatusModal(orderId) {
-    // Implementasi modal untuk update status
-    console.log('Opening status modal for order:', orderId);
-}
-
-// Cancel order
-function cancelOrder(orderId) {
-    if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-        // Implementasi pembatalan pesanan
-        console.log('Cancelling order:', orderId);
-    }
-}
-</script>
-@endpush
