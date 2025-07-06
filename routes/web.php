@@ -74,3 +74,18 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// --- ADMIN ROUTES ---
+Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Resource Controllers for CRUD
+    Route::resource('categories', AdminCategoryController::class);
+    Route::resource('products', AdminProductController::class);
+    Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);
+    Route::resource('customers', AdminCustomerController::class)->only(['index', 'show']);
+
+    // Custom route for updating order status
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+});

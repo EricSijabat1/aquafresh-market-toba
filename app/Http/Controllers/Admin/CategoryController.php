@@ -1,6 +1,5 @@
 <?php
 
-// app/Http/Controllers/Admin/CategoryController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -12,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('products')->paginate(10);
+        $categories = Category::withCount('products')->latest()->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -24,13 +23,14 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('image');
+        $data['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
@@ -44,8 +44,8 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        $category->load('products');
-        return view('admin.categories.show', compact('category'));
+        // Biasanya tidak diperlukan untuk kategori, tapi bisa dibuat jika perlu
+        return redirect()->route('admin.categories.index');
     }
 
     public function edit(Category $category)
@@ -56,13 +56,14 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('image');
+        $data['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
             if ($category->image) {
