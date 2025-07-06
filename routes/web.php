@@ -73,6 +73,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware('guest')->group(function () {
+    // ... (route auth lainnya)
+    
+    // Rute baru untuk login admin
+    Route::get('admin/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'createAdmin'])
+                ->name('admin.login');
+});
+
 require __DIR__ . '/auth.php';
 
 // --- ADMIN ROUTES ---

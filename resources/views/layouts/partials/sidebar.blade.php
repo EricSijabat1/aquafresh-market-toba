@@ -35,5 +35,17 @@
                 </a>
             </li>
         </ul>
+        <div class="mt-auto pt-4 border-t border-gray-700">
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <a href="{{ route('logout') }}"
+           onclick="event.preventDefault();
+                    this.closest('form').submit();"
+           class="flex items-center p-2 rounded-lg text-red-400 hover:bg-red-700 hover:text-white transition-colors duration-200">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </form>
+</div>
     </nav>
 </aside>

@@ -59,6 +59,27 @@
             <p><strong>Email:</strong> {{ $order->customer->email ?? '-' }}</p>
             <p><strong>Alamat:</strong> {{ $order->customer->address }}</p>
         </div>
+                {{-- PENAMBAHAN BAGIAN UNTUK UPDATE STATUS --}}
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-bold mb-4">Ubah Status Pesanan</h3>
+            <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="mb-4">
+                    <label for="status" class="block text-gray-700 font-medium mb-2">Status</label>
+                    <select name="status" id="status" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        @foreach(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as $status)
+                            <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>
+                                {{ ucfirst($status) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    Update Status
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
